@@ -24,7 +24,7 @@ Built to demonstrate enterprise-level architectural patterns including message q
 - **Async Processing**: RabbitMQ message queue with dedicated worker services
 - **Event-Driven Architecture**: Decoupled services communicating via message bus
 - **Clean Architecture**: Separation of concerns with layered project structure
-- **Docker Support**: Complete containerization with Docker Compose
+- **Container Support**: Complete containerization with Podman/Docker Compose
 - **Retry Policies**: Resilient message processing with automatic retries
 - **Dead Letter Queue**: Failed message handling and monitoring
 - **Health Checks**: API health monitoring endpoints
@@ -66,10 +66,12 @@ Built to demonstrate enterprise-level architectural patterns including message q
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Node.js 18+](https://nodejs.org/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Node.js 18+](https://nodejs.org/) with pnpm (`npm install -g pnpm`)
+- [Podman Desktop](https://podman.io/) or [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### Quick Start with Docker
+### Quick Start (Recommended)
+
+This project is designed to run with Podman Compose. All services (API, workers, database, message queue, and frontend) are orchestrated together.
 
 1. **Clone the repository**
 ```bash
@@ -79,7 +81,12 @@ Built to demonstrate enterprise-level architectural patterns including message q
 
 2. **Start all services**
 ```bash
-   docker-compose up -d
+   podman compose up -d
+```
+   
+   Or with Docker:
+```bash
+   docker compose up -d
 ```
 
 3. **Access the application**
@@ -87,7 +94,19 @@ Built to demonstrate enterprise-level architectural patterns including message q
    - API: http://localhost:5000
    - RabbitMQ Management: http://localhost:15672 (guest/guest)
 
-### Local Development
+4. **Stop all services**
+```bash
+   podman compose down
+```
+
+### Alternative: Local Development
+
+If you need to run services individually for development:
+
+#### Infrastructure only (PostgreSQL + RabbitMQ)
+```bash
+podman compose up postgres rabbitmq -d
+```
 
 #### Backend (.NET API + Workers)
 ```bash
@@ -100,13 +119,10 @@ dotnet run
 ```bash
 cd client
 pnpm install
-pnpm run dev
+pnpm dev
 ```
 
-#### Infrastructure (PostgreSQL + RabbitMQ)
-```bash
-docker-compose up postgres rabbitmq
-```
+> **Note**: For the best demonstration experience, use `podman compose up` to run everything together.
 
 ## 📁 Project Structure
 ```
@@ -121,7 +137,9 @@ realtime-notification-hub/
 │       └── NotificationHub.Workers.WhatsApp/
 ├── client/                                # React frontend
 ├── tests/                                 # Unit & integration tests
-├── docker-compose.yml                     # Docker orchestration
+│   ├── NotificationHub.Api.Tests/
+│   └── NotificationHub.Core.Tests/
+├── compose.yml                            # Podman/Docker orchestration
 └── README.md
 ```
 
@@ -140,13 +158,14 @@ realtime-notification-hub/
 - **React 18** - UI library
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Build tool
+- **pnpm** - Fast, disk space efficient package manager
 - **TanStack Query** - Data fetching & caching
 - **SignalR Client** - WebSocket client
 
 ### Infrastructure
 - **PostgreSQL 16** - Relational database
 - **RabbitMQ** - Message queue
-- **Docker/Podman** - Containerization
+- **Podman** - Container engine
 
 ## 📝 API Endpoints
 
@@ -176,11 +195,18 @@ GET    /health                           # Health check endpoint
 - **Message-Driven Architecture**: Event-based communication
 - **Worker Services**: Background processing
 - **Real-time Communication**: SignalR WebSockets
-- **Containerization**: Multi-container Docker/Podman setup
+- **Containerization**: Multi-container orchestration
 
 ## 🧪 Testing
 ```bash
+# Run all tests
+dotnet test
+
+# Run specific test project
 cd tests/NotificationHub.Api.Tests
+dotnet test
+
+cd tests/NotificationHub.Core.Tests
 dotnet test
 ```
 
@@ -211,6 +237,7 @@ This project demonstrates concepts from:
 - [.NET Microservices Architecture](https://dotnet.microsoft.com/learn/aspnet/microservices-architecture)
 - [SignalR Documentation](https://docs.microsoft.com/en-us/aspnet/core/signalr)
 - [RabbitMQ Tutorials](https://www.rabbitmq.com/getstarted.html)
+- [MassTransit Documentation](https://masstransit.io/)
 
 ## 🤝 Contributing
 
@@ -224,6 +251,7 @@ MIT License - feel free to use this project for learning purposes.
 
 **Héctor Rosario**
 - LinkedIn: [hector-rosario](https://www.linkedin.com/in/hector-rosario)
+- GitHub: [@hectorrosario22](https://github.com/hectorrosario22)
 - Email: [me@hrosario.dev](mailto:me@hrosario.dev)
 
 ---
