@@ -1,0 +1,141 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: notificationhub-postgres
+    environment:
+      POSTGRES_DB: notificationhub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    # You can uncomment it if you want persistence
+    # volumes:
+    #  - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notificationhub-network
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: notificationhub-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    # You can uncomment it if you want persistence
+    # volumes:
+    #  - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notificationhub-network
+
+  api:
+    build:
+      context: ./src
+      dockerfile: NotificationHub.Api/Dockerfile
+    container_name: notificationhub-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=notificationhub;Username=postgres;Password=postgres"
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - notificationhub-network
+    restart: unless-stopped
+
+  worker-email:
+    build:
+      context: ./src
+      dockerfile: Workers/NotificationHub.Workers.Email/Dockerfile
+    container_name: notificationhub-worker-email
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=notificationhub;Username=postgres;Password=postgres"
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+      RabbitMQ__QueueName: email-queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - notificationhub-network
+    restart: unless-stopped
+
+  worker-sms:
+    build:
+      context: ./src
+      dockerfile: Workers/NotificationHub.Workers.Sms/Dockerfile
+    container_name: notificationhub-worker-sms
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=notificationhub;Username=postgres;Password=postgres"
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+      RabbitMQ__QueueName: sms-queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - notificationhub-network
+    restart: unless-stopped
+
+  worker-whatsapp:
+    build:
+      context: ./src
+      dockerfile: Workers/NotificationHub.Workers.WhatsApp/Dockerfile
+    container_name: notificationhub-worker-whatsapp
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=notificationhub;Username=postgres;Password=postgres"
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+      RabbitMQ__QueueName: whatsapp-queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - notificationhub-network
+    restart: unless-stopped
+
+networks:
+  notificationhub-network:
+    driver: bridge
+
+# You can uncomment it if you want persistence
+# volumes:
+#  postgres_data:
+#  rabbitmq_data:

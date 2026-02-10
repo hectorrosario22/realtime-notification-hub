@@ -12,12 +12,13 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-// Add DbContext with In-Memory database
+// Add DbContext with PostgreSQL or In-Memory database
 builder.Services.AddDbContext<NotificationDbContext>(options =>
-    options.UseInMemoryDatabase("NotificationHubDb"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register repository
+// Register repositories
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationLogRepository, NotificationLogRepository>();
 
 // Add CORS for local development
 builder.Services.AddCors(options =>
@@ -33,12 +34,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+await dbContext.Database.MigrateAsync();
 
 app.UseHttpsRedirection();
 

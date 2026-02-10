@@ -29,12 +29,6 @@ public record SendNotificationRequest
     public NotificationChannel Channel { get; init; }
 
     /// <summary>
-    /// Notification type/severity (1=Info, 2=Success, 3=Warning, 4=Error)
-    /// </summary>
-    [Required(ErrorMessage = "Type is required")]
-    public NotificationType Type { get; init; }
-
-    /// <summary>
     /// Recipient identifier (email, phone number, user ID)
     /// </summary>
     [MaxLength(256, ErrorMessage = "RecipientId cannot exceed 256 characters")]

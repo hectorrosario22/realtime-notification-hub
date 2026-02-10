@@ -9,31 +9,24 @@ namespace NotificationHub.Api.Repositories;
 /// <summary>
 /// Repository implementation for notification data access.
 /// </summary>
-public class NotificationRepository : INotificationRepository
+public class NotificationRepository(NotificationDbContext context) : INotificationRepository
 {
-    private readonly NotificationDbContext _context;
-
-    public NotificationRepository(NotificationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Notification?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Notification>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Notification>> GetByStatusAsync(NotificationStatus status, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .Where(n => n.Status == status)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -41,7 +34,7 @@ public class NotificationRepository : INotificationRepository
 
     public async Task<IEnumerable<Notification>> GetByRecipientAsync(string recipientId, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .Where(n => n.RecipientId == recipientId)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -49,24 +42,12 @@ public class NotificationRepository : INotificationRepository
 
     public async Task<Notification> AddAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        // Set default values
-        if (notification.Id == Guid.Empty)
-        {
-            notification.Id = Guid.NewGuid();
-        }
+        notification.Id = Guid.NewGuid();
+        notification.CreatedAt = DateTime.UtcNow;
+        notification.Status = NotificationStatus.Pending;
 
-        if (notification.CreatedAt == default)
-        {
-            notification.CreatedAt = DateTime.UtcNow;
-        }
-
-        if (notification.Status == default)
-        {
-            notification.Status = NotificationStatus.Pending;
-        }
-
-        await _context.Notifications.AddAsync(notification, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.Notifications.AddAsync(notification, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
         return notification;
     }
@@ -75,8 +56,8 @@ public class NotificationRepository : INotificationRepository
     {
         notification.UpdatedAt = DateTime.UtcNow;
 
-        _context.Notifications.Update(notification);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Notifications.Update(notification);
+        await context.SaveChangesAsync(cancellationToken);
 
         return notification;
     }
@@ -89,8 +70,8 @@ public class NotificationRepository : INotificationRepository
             return false;
         }
 
-        _context.Notifications.Remove(notification);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Notifications.Remove(notification);
+        await context.SaveChangesAsync(cancellationToken);
 
         return true;
     }

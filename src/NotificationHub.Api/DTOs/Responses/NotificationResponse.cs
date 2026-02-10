@@ -3,7 +3,8 @@ using NotificationHub.Api.Enums;
 namespace NotificationHub.Api.DTOs.Responses;
 
 /// <summary>
-/// Response model for notification data.
+/// Polymorphic response model for notification data.
+/// Includes all channel-specific properties (null if not applicable).
 /// </summary>
 public record NotificationResponse
 {
@@ -13,24 +14,9 @@ public record NotificationResponse
     public Guid Id { get; init; }
 
     /// <summary>
-    /// Notification title/subject
-    /// </summary>
-    public required string Title { get; init; }
-
-    /// <summary>
-    /// Main notification message content
-    /// </summary>
-    public required string Message { get; init; }
-
-    /// <summary>
     /// Delivery channel (Email, SMS, WhatsApp, Push)
     /// </summary>
     public NotificationChannel Channel { get; init; }
-
-    /// <summary>
-    /// Notification type/severity (Info, Success, Warning, Error)
-    /// </summary>
-    public NotificationType Type { get; init; }
 
     /// <summary>
     /// Current status in the notification lifecycle
@@ -41,11 +27,6 @@ public record NotificationResponse
     /// Recipient identifier (email, phone number, user ID)
     /// </summary>
     public string? RecipientId { get; init; }
-
-    /// <summary>
-    /// Recipient display name
-    /// </summary>
-    public string? RecipientName { get; init; }
 
     /// <summary>
     /// When the notification was created
@@ -63,11 +44,6 @@ public record NotificationResponse
     public DateTime? SentAt { get; init; }
 
     /// <summary>
-    /// When the notification was read by the recipient
-    /// </summary>
-    public DateTime? ReadAt { get; init; }
-
-    /// <summary>
     /// Error message if delivery failed
     /// </summary>
     public string? ErrorMessage { get; init; }
@@ -77,8 +53,42 @@ public record NotificationResponse
     /// </summary>
     public int RetryCount { get; init; }
 
+    // Email-specific properties
     /// <summary>
-    /// Additional metadata for channel-specific data
+    /// Email subject line (Email notifications only)
     /// </summary>
-    public Dictionary<string, string>? Metadata { get; init; }
+    public string? Subject { get; init; }
+
+    /// <summary>
+    /// Email body in HTML format (Email notifications only)
+    /// </summary>
+    public string? HtmlBody { get; init; }
+
+    // SMS-specific properties
+    /// <summary>
+    /// SMS message content (SMS notifications only)
+    /// </summary>
+    public string? Content { get; init; }
+
+    // WhatsApp-specific properties
+    /// <summary>
+    /// WhatsApp template name (WhatsApp notifications only)
+    /// </summary>
+    public string? TemplateName { get; init; }
+
+    /// <summary>
+    /// Template parameters (WhatsApp notifications only)
+    /// </summary>
+    public Dictionary<string, string>? Parameters { get; init; }
+
+    // Push-specific properties
+    /// <summary>
+    /// Push notification title (Push notifications only)
+    /// </summary>
+    public string? Title { get; init; }
+
+    /// <summary>
+    /// When the notification was read by the recipient (Push notifications only)
+    /// </summary>
+    public DateTime? ReadAt { get; init; }
 }
