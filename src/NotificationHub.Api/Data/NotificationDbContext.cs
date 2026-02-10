@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using NotificationHub.Core.Entities;
+using NotificationHub.Api.Entities;
 
-namespace NotificationHub.Infrastructure.Data;
+namespace NotificationHub.Api.Data;
 
 /// <summary>
 /// Database context for the Notification Hub application.

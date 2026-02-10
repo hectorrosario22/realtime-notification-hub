@@ -1,7 +1,7 @@
-using NotificationHub.Core.Entities;
-using NotificationHub.Core.Enums;
+using NotificationHub.Api.Entities;
+using NotificationHub.Api.Enums;
 
-namespace NotificationHub.Core.Interfaces;
+namespace NotificationHub.Api.Interfaces;
 
 /// <summary>
 /// Repository contract for notification data access operations.

@@ -1,4 +1,4 @@
-using NotificationHub.Core.Enums;
+using NotificationHub.Api.Enums;
 
 namespace NotificationHub.Api.DTOs.Requests;
 

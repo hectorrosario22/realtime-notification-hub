@@ -1,4 +1,4 @@
-namespace NotificationHub.Core.Enums;
+namespace NotificationHub.Api.Enums;
 
 /// <summary>
 /// Represents the delivery channel for a notification.

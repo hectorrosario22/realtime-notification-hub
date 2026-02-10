@@ -23,12 +23,12 @@ Built to demonstrate enterprise-level architectural patterns including message q
 - **Real-time Updates**: SignalR WebSocket connection for instant push notifications
 - **Async Processing**: RabbitMQ message queue with dedicated worker services
 - **Event-Driven Architecture**: Decoupled services communicating via message bus
-- **Clean Architecture**: Separation of concerns with layered project structure
+- **Simplified Architecture**: Single API project with all domain logic for portfolio simplicity
 - **Container Support**: Complete containerization with Podman/Docker Compose
 - **Retry Policies**: Resilient message processing with automatic retries
 - **Dead Letter Queue**: Failed message handling and monitoring
-- **Health Checks**: API health monitoring endpoints
-- **Structured Logging**: Centralized logging with Serilog
+- **REST API**: Clean RESTful endpoints with Swagger/OpenAPI documentation
+- **Entity Framework Core**: Code-first database with PostgreSQL support
 
 ## 🏗️ Architecture
 ```
@@ -108,12 +108,16 @@ If you need to run services individually for development:
 podman compose up postgres rabbitmq -d
 ```
 
-#### Backend (.NET API + Workers)
+##### Backend (.NET API)
 ```bash
 cd src/NotificationHub.Api
 dotnet restore
 dotnet run
 ```
+
+Access the API:
+- API: http://localhost:5000
+- Swagger UI: http://localhost:5000/swagger
 
 #### Frontend (React)
 ```bash
@@ -125,23 +129,31 @@ pnpm dev
 > **Note**: For the best demonstration experience, use `podman compose up` to run everything together.
 
 ## 📁 Project Structure
+
+**Simplified for Portfolio** - All backend logic consolidated in one project for easier understanding:
+
 ```
 realtime-notification-hub/
 ├── src/
-│   ├── NotificationHub.Api/              # REST API + SignalR Hub
-│   ├── NotificationHub.Core/             # Domain models & interfaces
-│   ├── NotificationHub.Infrastructure/   # Data access & messaging
-│   └── NotificationHub.Workers/          # Background workers
+│   ├── NotificationHub.Api/              # Main API project
+│   │   ├── Controllers/                  # REST API endpoints
+│   │   ├── Entities/                     # Domain models
+│   │   ├── Enums/                        # Notification types & statuses
+│   │   ├── Interfaces/                   # Repository contracts
+│   │   ├── Repositories/                 # Data access implementations
+│   │   ├── Data/                         # EF Core DbContext & configurations
+│   │   ├── DTOs/                         # Request/Response models
+│   │   └── Hubs/                         # SignalR hubs (to be implemented)
+│   └── Workers/                          # Background workers
 │       ├── NotificationHub.Workers.Email/
 │       ├── NotificationHub.Workers.Sms/
 │       └── NotificationHub.Workers.WhatsApp/
-├── client/                                # React frontend
-├── tests/                                 # Unit & integration tests
-│   ├── NotificationHub.Api.Tests/
-│   └── NotificationHub.Core.Tests/
-├── compose.yml                            # Podman/Docker orchestration
+├── client/                                # React frontend (to be implemented)
+├── compose.yml                            # Podman/Docker orchestration (to be created)
 └── README.md
 ```
+
+> **Note**: This architecture prioritizes simplicity and clarity for a portfolio project. Production apps may benefit from additional layers.
 
 ## 🔧 Technology Stack
 
@@ -171,50 +183,54 @@ realtime-notification-hub/
 
 ### Notifications
 ```http
-POST   /api/notifications/send          # Send notification to queue
+POST   /api/notifications/send          # Send notification
 GET    /api/notifications               # Get all notifications
+GET    /api/notifications/{id}          # Get notification by ID
 PATCH  /api/notifications/{id}/read     # Mark as read
 ```
 
-### SignalR Hub
+### Documentation
+```
+/swagger                                 # Swagger UI (Development only)
+/openapi/v1.json                        # OpenAPI specification
+```
+
+### SignalR Hub (To be implemented)
 ```
 /hubs/notifications                      # WebSocket endpoint
 ```
 
-### Health
-```http
-GET    /health                           # Health check endpoint
-```
-
-## 🎯 Use Cases Demonstrated
+## 🎯 Patterns & Practices Demonstrated
 
 - **Async/Await Patterns**: Proper async implementation throughout
-- **Dependency Injection**: Clean DI configuration
-- **Repository Pattern**: Data access abstraction
-- **CQRS Principles**: Command/Query separation
-- **Message-Driven Architecture**: Event-based communication
-- **Worker Services**: Background processing
-- **Real-time Communication**: SignalR WebSockets
-- **Containerization**: Multi-container orchestration
+- **Dependency Injection**: Built-in .NET DI container
+- **Repository Pattern**: Data access abstraction layer
+- **Entity Framework Core**: Code-first database design with configurations
+- **REST API Design**: RESTful endpoints with proper HTTP semantics
+- **DTOs**: Request/Response models separate from entities
+- **OpenAPI/Swagger**: Auto-generated API documentation
+- **CORS Configuration**: Cross-origin resource sharing for frontend
+- **Primary Constructors**: Modern C# 12 syntax (where applicable)
 
 ## 🧪 Testing
+
+Currently using in-memory database for development. Testing infrastructure to be added.
+
 ```bash
-# Run all tests
-dotnet test
+# Build the solution
+dotnet build
 
-# Run specific test project
-cd tests/NotificationHub.Api.Tests
-dotnet test
-
-cd tests/NotificationHub.Core.Tests
-dotnet test
+# Run the API
+cd src/NotificationHub.Api
+dotnet run
 ```
 
-## 📊 Monitoring
+## 📊 Development Tools
 
-- **RabbitMQ Management UI**: http://localhost:15672
-- **API Health Check**: http://localhost:5000/health
-- **Structured Logs**: Console output with Serilog
+- **Swagger UI**: http://localhost:5000/swagger (interactive API documentation)
+- **OpenAPI Spec**: http://localhost:5000/openapi/v1.json
+- **In-Memory Database**: Quick development without PostgreSQL setup
+- **RabbitMQ Management** (when using containers): http://localhost:15672
 
 ## 🚀 Production Considerations
 

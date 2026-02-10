@@ -1,16 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/NotificationHub.Api/NotificationHub.Api.csproj" />
-    <Project Path="src/NotificationHub.Core/NotificationHub.Core.csproj" />
-    <Project Path="src/NotificationHub.Infrastructure/NotificationHub.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Workers/">
     <Project Path="src/Workers/NotificationHub.Workers.Email/NotificationHub.Workers.Email.csproj" />
     <Project Path="src/Workers/NotificationHub.Workers.Sms/NotificationHub.Workers.Sms.csproj" />
     <Project Path="src/Workers/NotificationHub.Workers.WhatsApp/NotificationHub.Workers.WhatsApp.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/NotificationHub.Api.Tests/NotificationHub.Api.Tests.csproj" />
-    <Project Path="tests/NotificationHub.Core.Tests/NotificationHub.Core.Tests.csproj" />
   </Folder>
 </Solution>

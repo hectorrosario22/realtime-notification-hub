@@ -1,6 +1,6 @@
-using NotificationHub.Core.Enums;
+using NotificationHub.Api.Enums;
 
-namespace NotificationHub.Core.Entities;
+namespace NotificationHub.Api.Entities;
 
 /// <summary>
 /// Represents a notification entity that can be sent through various channels.

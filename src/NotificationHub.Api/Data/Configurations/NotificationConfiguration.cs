@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NotificationHub.Core.Entities;
-using NotificationHub.Core.Enums;
+using NotificationHub.Api.Entities;
+using NotificationHub.Api.Enums;
 using System.Text.Json;
 
-namespace NotificationHub.Infrastructure.Data.Configurations;
+namespace NotificationHub.Api.Data.Configurations;
 
 /// <summary>
 /// Entity Framework configuration for the Notification entity.

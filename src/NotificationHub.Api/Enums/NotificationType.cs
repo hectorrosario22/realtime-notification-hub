@@ -1,4 +1,4 @@
-namespace NotificationHub.Core.Enums;
+namespace NotificationHub.Api.Enums;
 
 /// <summary>
 /// Represents the severity or type of notification content.

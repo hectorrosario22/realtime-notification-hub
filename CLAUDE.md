@@ -6,14 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Realtime Notification Hub is a multi-channel notification system built with .NET 10 demonstrating event-driven architecture, message queuing, and real-time communication patterns. The system supports Email, SMS, WhatsApp, and Push notifications through a unified API with asynchronous worker processing.
 
-**Current Status**: Project structure is scaffolded. Core implementation (SignalR hubs, RabbitMQ integration, worker services, database models) needs to be built.
+**Current Status**: Basic REST API and entities implemented. SignalR hubs, RabbitMQ integration, and worker services need to be built.
 
 ## Architecture
 
-### Layered Structure
-- **NotificationHub.Api**: ASP.NET Core Web API + SignalR Hub for real-time communication
-- **NotificationHub.Core**: Domain models, entities, interfaces (repository/service contracts)
-- **NotificationHub.Infrastructure**: Data access (EF Core + PostgreSQL), RabbitMQ messaging implementation
+### Project Structure (Simplified for Portfolio)
+- **NotificationHub.Api**: Main ASP.NET Core Web API containing everything (entities, data access, repositories, controllers, SignalR hub)
 - **NotificationHub.Workers.{Email|Sms|WhatsApp}**: Background console apps consuming from RabbitMQ queues
 
 ### Technology Stack
@@ -72,12 +70,19 @@ dotnet test --filter "FullyQualifiedName~EmailService" # Run specific test class
 - API: http://localhost:5000
 - RabbitMQ Management UI: http://localhost:15672 (guest/guest)
 
-## Project References
+## Project Structure
 
-- **Api** depends on: Core, Infrastructure
-- **Infrastructure** depends on: Core
-- **Workers** depend on: Core (through Infrastructure when implemented)
-- **Tests** reference their corresponding source projects
+The Api project contains:
+- **Entities/**: Domain models (Notification)
+- **Enums/**: Enumerations (NotificationChannel, NotificationStatus, NotificationType)
+- **Interfaces/**: Repository contracts (INotificationRepository)
+- **Repositories/**: Repository implementations (NotificationRepository)
+- **Data/**: EF Core DbContext and entity configurations
+- **Controllers/**: REST API endpoints
+- **DTOs/**: Request/Response models
+- **Hubs/**: SignalR hubs (to be implemented)
+
+Workers will reference the Api project when implemented to access shared entities and enums.
 
 ## Key Implementation Notes
 
@@ -87,12 +92,13 @@ dotnet test --filter "FullyQualifiedName~EmailService" # Run specific test class
 - Never commit sensitive credentials; use environment variables or user secrets for local dev
 
 ### Database
-- Use EF Core migrations for schema changes: `dotnet ef migrations add <MigrationName>` (run from Api or Infrastructure project)
+- Use EF Core migrations for schema changes: `dotnet ef migrations add <MigrationName>` (run from Api project)
 - Apply migrations: `dotnet ef database update`
-- DbContext should live in Infrastructure layer
+- DbContext is in `Data/NotificationDbContext.cs`
+- Entity configurations are in `Data/Configurations/`
 
 ### Message Queue
-- Define message contracts in Core layer (shared between publisher and consumers)
+- Define message contracts in Api project (shared between publisher and consumers)
 - Use MassTransit for RabbitMQ integration (configure in Program.cs)
 - Implement retry policies with Polly (exponential backoff recommended)
 - Each worker service should consume from its dedicated queue (email-queue, sms-queue, whatsapp-queue)
@@ -101,12 +107,6 @@ dotnet test --filter "FullyQualifiedName~EmailService" # Run specific test class
 - Hub should be in Api project at `/hubs/notifications`
 - Send real-time updates when notification status changes
 - Clients connect via SignalR client library (@microsoft/signalr for React)
-
-### Testing
-- Unit tests in NotificationHub.Core.Tests for domain logic
-- Integration tests in NotificationHub.Api.Tests for API endpoints and SignalR hubs
-- Use xUnit for all tests
-- Mock external dependencies (RabbitMQ, database) in unit tests
 
 ## Container Development
 

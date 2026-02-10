@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using NotificationHub.Core.Entities;
-using NotificationHub.Core.Enums;
-using NotificationHub.Core.Interfaces;
-using NotificationHub.Infrastructure.Data;
+using NotificationHub.Api.Data;
+using NotificationHub.Api.Entities;
+using NotificationHub.Api.Enums;
+using NotificationHub.Api.Interfaces;
 
-namespace NotificationHub.Infrastructure.Repositories;
+namespace NotificationHub.Api.Repositories;
 
 /// <summary>
 /// Repository implementation for notification data access.

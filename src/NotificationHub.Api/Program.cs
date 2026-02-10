@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using NotificationHub.Core.Interfaces;
-using NotificationHub.Infrastructure.Data;
-using NotificationHub.Infrastructure.Repositories;
+using NotificationHub.Api.Data;
+using NotificationHub.Api.Interfaces;
+using NotificationHub.Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 
 // Add OpenAPI/Swagger
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 // Add DbContext with In-Memory database
 builder.Services.AddDbContext<NotificationDbContext>(options =>
@@ -35,6 +36,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

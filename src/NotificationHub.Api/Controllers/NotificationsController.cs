@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using NotificationHub.Api.DTOs.Requests;
 using NotificationHub.Api.DTOs.Responses;
-using NotificationHub.Core.Entities;
-using NotificationHub.Core.Enums;
-using NotificationHub.Core.Interfaces;
+using NotificationHub.Api.Entities;
+using NotificationHub.Api.Enums;
+using NotificationHub.Api.Interfaces;
 
 namespace NotificationHub.Api.Controllers;
 
