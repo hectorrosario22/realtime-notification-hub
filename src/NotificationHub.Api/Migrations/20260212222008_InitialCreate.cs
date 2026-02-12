@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NotificationHub.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class RefactorNotificationEntitiesWithInheritance : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,21 +18,23 @@ namespace NotificationHub.Api.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Channel = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    RecipientId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    RetryCount = table.Column<int>(type: "integer", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    Discriminator = table.Column<string>(type: "character varying(13)", maxLength: 13, nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false),
+                    RecipientId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Subject = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     HtmlBody = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: true),
-                    PushTitle = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    PushContent = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    ReadAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     SmsContent = table.Column<string>(type: "character varying(1600)", maxLength: 1600, nullable: true),
                     TemplateName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    Parameters = table.Column<string>(type: "text", nullable: true)
+                    Parameters = table.Column<string>(type: "text", nullable: true),
+                    PushTitle = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    PushContent = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ScheduledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ReadAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RetryCount = table.Column<int>(type: "integer", nullable: false),
+                    MaxRetries = table.Column<int>(type: "integer", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NotificationHub.Api.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20260212220414_UseDomainNotificationAggregate")]
-    partial class UseDomainNotificationAggregate
+    [Migration("20260212222008_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,51 +24,6 @@ namespace NotificationHub.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("NotificationHub.Api.Entities.NotificationLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Channel")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ErrorDetails")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<Guid>("NotificationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RequestData")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ResponseData")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Channel");
-
-                    b.HasIndex("EventType");
-
-                    b.HasIndex("NotificationId");
-
-                    b.HasIndex("Timestamp");
-
-                    b.ToTable("NotificationLogs");
-                });
 
             modelBuilder.Entity("NotificationHub.Domain.Notifications.Notification", b =>
                 {
@@ -164,7 +119,52 @@ namespace NotificationHub.Api.Migrations
                     b.ToTable("Notifications", (string)null);
                 });
 
-            modelBuilder.Entity("NotificationHub.Api.Entities.NotificationLog", b =>
+            modelBuilder.Entity("NotificationHub.Domain.Notifications.NotificationLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Channel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorDetails")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequestData")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResponseData")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Channel");
+
+                    b.HasIndex("EventType");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("Timestamp");
+
+                    b.ToTable("NotificationLogs");
+                });
+
+            modelBuilder.Entity("NotificationHub.Domain.Notifications.NotificationLog", b =>
                 {
                     b.HasOne("NotificationHub.Domain.Notifications.Notification", "Notification")
                         .WithMany()
