@@ -1,6 +1,6 @@
 # Realtime Notification Hub - Architecture Diagrams
 
-> Reference diagrams for the Clean Architecture + DDD restructuring (Phase 0).
+> Reference diagrams for the Clean Architecture + DDD restructuring (Fase 0).
 > Render with [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) in VS Code or at [mermaid.live](https://mermaid.live).
 
 ---

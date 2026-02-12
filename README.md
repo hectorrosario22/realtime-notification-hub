@@ -20,15 +20,19 @@ Built to demonstrate enterprise-level architectural patterns including message q
 
 ## ✨ Key Features
 
-- **Real-time Updates**: SignalR WebSocket connection for instant push notifications
-- **Async Processing**: RabbitMQ message queue with dedicated worker services
-- **Event-Driven Architecture**: Decoupled services communicating via message bus
-- **Simplified Architecture**: Single API project with all domain logic for portfolio simplicity
-- **Container Support**: Complete containerization with Podman/Docker Compose
-- **Retry Policies**: Resilient message processing with automatic retries
-- **Dead Letter Queue**: Failed message handling and monitoring
-- **REST API**: Clean RESTful endpoints with Swagger/OpenAPI documentation
-- **Entity Framework Core**: Code-first database with PostgreSQL support
+### Implemented Today
+
+- **REST API**: CRUD-style notification endpoints with Swagger/OpenAPI.
+- **Data Layer**: EF Core + PostgreSQL with migrations.
+- **Notification Model**: Multi-channel notifications using TPH inheritance.
+- **Container Support**: `compose.yml` orchestration for API, workers, PostgreSQL, and RabbitMQ.
+
+### Planned in Roadmap
+
+- **Real-time Updates**: SignalR hub and client group broadcasting.
+- **Async Processing**: Worker consumers with broker-driven processing.
+- **Reliability**: Outbox, idempotency, retry policies, and DLQ/replay.
+- **Security and Operability**: JWT auth, rate limiting, health checks, and observability.
 
 ## 🏗️ Architecture
 ```
@@ -61,6 +65,11 @@ Built to demonstrate enterprise-level architectural patterns including message q
 └─────────────────┘
 ```
 
+Current and target architecture details are documented in:
+
+- `docs/architecture.md`
+- `docs/adr/README.md`
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -71,7 +80,7 @@ Built to demonstrate enterprise-level architectural patterns including message q
 
 ### Quick Start (Recommended)
 
-This project is designed to run with Podman Compose. All services (API, workers, database, message queue, and frontend) are orchestrated together.
+This project is designed to run with Podman Compose. Current compose orchestration includes API, workers, database, and message queue.
 
 1. **Clone the repository**
 ```bash
@@ -89,8 +98,7 @@ This project is designed to run with Podman Compose. All services (API, workers,
    docker compose up -d
 ```
 
-3. **Access the application**
-   - Frontend: http://localhost:3000
+3. **Access running services**
    - API: http://localhost:5000
    - RabbitMQ Management: http://localhost:15672 (guest/guest)
 
@@ -119,12 +127,8 @@ Access the API:
 - API: http://localhost:5000
 - Swagger UI: http://localhost:5000/swagger
 
-#### Frontend (React)
-```bash
-cd client
-pnpm install
-pnpm dev
-```
+#### Frontend (React SPA, planned)
+The SPA workspace is reserved at `src/NotificationHub.Web/` and will be added in upcoming phases.
 
 > **Note**: For the best demonstration experience, use `podman compose up` to run everything together.
 
@@ -144,16 +148,40 @@ realtime-notification-hub/
 │   │   ├── Data/                         # EF Core DbContext & configurations
 │   │   ├── DTOs/                         # Request/Response models
 │   │   └── Hubs/                         # SignalR hubs (to be implemented)
+│   ├── NotificationHub.Web/              # SPA workspace (planned React app)
 │   └── Workers/                          # Background workers
 │       ├── NotificationHub.Workers.Email/
 │       ├── NotificationHub.Workers.Sms/
 │       └── NotificationHub.Workers.WhatsApp/
-├── client/                                # React frontend (to be implemented)
-├── compose.yml                            # Podman/Docker orchestration (to be created)
+├── tests/                                 # Automated tests (xUnit, integration)
+├── compose.yml                            # Podman/Docker orchestration
 └── README.md
 ```
 
 > **Note**: This architecture prioritizes simplicity and clarity for a portfolio project. Production apps may benefit from additional layers.
+
+## 🧭 Architecture Decision Records
+
+Architectural decisions are tracked as ADRs in `docs/adr/` to keep design intent explicit and avoid documentation drift.
+
+- `ADR-001`: Layering and dependency rule
+- `ADR-002`: Delivery semantics (at-least-once)
+- `ADR-003`: Consistency strategy (Outbox + idempotency)
+
+## 🗺️ Roadmap Index
+
+Roadmap tracking is managed from this README, with detailed plans in `docs/plans/`.
+
+- [ ] Fase 1 - Foundation and Architecture Baseline  
+  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-1---foundation-and-architectural-baseline-weeks-1-3`
+- [ ] Fase 2 - Reliable Messaging Core  
+  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-2---reliable-messaging-core-weeks-4-7`
+- [ ] Fase 3 - Resilience and Failure Recovery  
+  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-3---resilience-and-failure-recovery-weeks-8-10`
+- [ ] Fase 4 - Scale and Operability Maturity  
+  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-4---scale-and-operability-maturity-weeks-11-13`
+- [ ] Fase 5 - Portfolio Packaging and Interview Readiness  
+  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-5---portfolio-packaging-and-interview-readiness-weeks-14-16`
 
 ## 🔧 Technology Stack
 
@@ -183,7 +211,10 @@ realtime-notification-hub/
 
 ### Notifications
 ```http
-POST   /api/notifications/send          # Send notification
+POST   /api/notifications/email         # Send email notification
+POST   /api/notifications/sms           # Send SMS notification
+POST   /api/notifications/whatsapp      # Send WhatsApp notification
+POST   /api/notifications/push          # Send push notification
 GET    /api/notifications               # Get all notifications
 GET    /api/notifications/{id}          # Get notification by ID
 PATCH  /api/notifications/{id}/read     # Mark as read
