@@ -4,12 +4,10 @@ using NotificationHub.Api.DTOs.Responses;
 using NotificationHub.Api.Entities;
 using NotificationHub.Api.Enums;
 using NotificationHub.Api.Interfaces;
+using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Controllers;
 
-/// <summary>
-/// Manages notification operations.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class NotificationsController(
@@ -18,12 +16,6 @@ public class NotificationsController(
     ILogger<NotificationsController> logger)
     : ControllerBase
 {
-    /// <summary>
-    /// Sends an email notification.
-    /// </summary>
-    /// <param name="request">Email notification details</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created notification</returns>
     [HttpPost("email")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,37 +25,19 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending email notification to {RecipientId}", request.RecipientId);
 
-        var notification = new EmailNotification
-        {
-            Id = Guid.NewGuid(),
-            RecipientId = request.RecipientId,
-            Subject = request.Subject,
-            HtmlBody = request.HtmlBody,
-            Status = NotificationStatus.Pending,
-            RetryCount = 0,
-            CreatedAt = DateTime.UtcNow
-        };
+        var notification = Notification.CreateEmail(
+            request.RecipientId,
+            request.Subject,
+            request.HtmlBody);
 
         var created = await repository.AddAsync(notification, cancellationToken);
 
-        // Create audit log
-        await CreateLogEntryAsync(created.Id, NotificationChannel.Email, NotificationEventType.Created,
+        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
             "Email notification created", cancellationToken);
 
-        var response = MapToResponse(created);
-
-        return CreatedAtAction(
-            nameof(GetNotificationById),
-            new { id = created.Id },
-            response);
+        return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
 
-    /// <summary>
-    /// Sends an SMS notification.
-    /// </summary>
-    /// <param name="request">SMS notification details</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created notification</returns>
     [HttpPost("sms")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -73,36 +47,18 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending SMS notification to {RecipientId}", request.RecipientId);
 
-        var notification = new SmsNotification
-        {
-            Id = Guid.NewGuid(),
-            RecipientId = request.RecipientId,
-            Content = request.Content,
-            Status = NotificationStatus.Pending,
-            RetryCount = 0,
-            CreatedAt = DateTime.UtcNow
-        };
+        var notification = Notification.CreateSms(
+            request.RecipientId,
+            request.Content);
 
         var created = await repository.AddAsync(notification, cancellationToken);
 
-        // Create audit log
-        await CreateLogEntryAsync(created.Id, NotificationChannel.Sms, NotificationEventType.Created,
+        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
             "SMS notification created", cancellationToken);
 
-        var response = MapToResponse(created);
-
-        return CreatedAtAction(
-            nameof(GetNotificationById),
-            new { id = created.Id },
-            response);
+        return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
 
-    /// <summary>
-    /// Sends a WhatsApp notification.
-    /// </summary>
-    /// <param name="request">WhatsApp notification details</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created notification</returns>
     [HttpPost("whatsapp")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -112,37 +68,19 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending WhatsApp notification to {RecipientId}", request.RecipientId);
 
-        var notification = new WhatsAppNotification
-        {
-            Id = Guid.NewGuid(),
-            RecipientId = request.RecipientId,
-            TemplateName = request.TemplateName,
-            Parameters = request.Parameters,
-            Status = NotificationStatus.Pending,
-            RetryCount = 0,
-            CreatedAt = DateTime.UtcNow
-        };
+        var notification = Notification.CreateWhatsApp(
+            request.RecipientId,
+            request.TemplateName,
+            request.Parameters);
 
         var created = await repository.AddAsync(notification, cancellationToken);
 
-        // Create audit log
-        await CreateLogEntryAsync(created.Id, NotificationChannel.WhatsApp, NotificationEventType.Created,
+        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
             "WhatsApp notification created", cancellationToken);
 
-        var response = MapToResponse(created);
-
-        return CreatedAtAction(
-            nameof(GetNotificationById),
-            new { id = created.Id },
-            response);
+        return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
 
-    /// <summary>
-    /// Sends a push notification.
-    /// </summary>
-    /// <param name="request">Push notification details</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created notification</returns>
     [HttpPost("push")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -152,55 +90,28 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending push notification to {RecipientId}", request.RecipientId);
 
-        var notification = new PushNotification
-        {
-            Id = Guid.NewGuid(),
-            RecipientId = request.RecipientId,
-            Title = request.Title,
-            Content = request.Content,
-            Status = NotificationStatus.Pending,
-            RetryCount = 0,
-            CreatedAt = DateTime.UtcNow
-        };
+        var notification = Notification.CreatePush(
+            request.RecipientId,
+            request.Title,
+            request.Content);
 
         var created = await repository.AddAsync(notification, cancellationToken);
 
-        // Create audit log
-        await CreateLogEntryAsync(created.Id, NotificationChannel.Push, NotificationEventType.Created,
+        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
             "Push notification created", cancellationToken);
 
-        var response = MapToResponse(created);
-
-        return CreatedAtAction(
-            nameof(GetNotificationById),
-            new { id = created.Id },
-            response);
+        return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
 
-    /// <summary>
-    /// Retrieves all notifications.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of all notifications</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<NotificationResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<NotificationResponse>>> GetAllNotifications(
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Retrieving all notifications");
-
         var notifications = await repository.GetAllAsync(cancellationToken);
-        var responses = notifications.Select(MapToResponse);
-
-        return Ok(responses);
+        return Ok(notifications.Select(MapToResponse));
     }
 
-    /// <summary>
-    /// Retrieves a notification by ID.
-    /// </summary>
-    /// <param name="id">Notification ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The notification if found</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -208,25 +119,15 @@ public class NotificationsController(
         Guid id,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Retrieving notification: {Id}", id);
-
         var notification = await repository.GetByIdAsync(id, cancellationToken);
-
         if (notification is null)
         {
-            logger.LogWarning("Notification not found: {Id}", id);
             return NotFound(new { message = $"Notification with ID {id} not found" });
         }
 
         return Ok(MapToResponse(notification));
     }
 
-    /// <summary>
-    /// Marks a push notification as read.
-    /// </summary>
-    /// <param name="id">Notification ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The updated notification</returns>
     [HttpPatch("{id}/read")]
     [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -235,79 +136,55 @@ public class NotificationsController(
         Guid id,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Marking notification as read: {Id}", id);
-
         var notification = await repository.GetByIdAsync(id, cancellationToken);
-
         if (notification is null)
         {
-            logger.LogWarning("Notification not found: {Id}", id);
             return NotFound(new { message = $"Notification with ID {id} not found" });
         }
 
-        if (notification is not PushNotification pushNotification)
+        if (notification.Channel != NotificationChannel.Push)
         {
-            logger.LogWarning("Cannot mark non-push notification as read: {Id}, Channel: {Channel}", id, notification.Channel);
             return BadRequest(new { message = "Only push notifications can be marked as read" });
         }
 
-        pushNotification.Status = NotificationStatus.Read;
-        pushNotification.ReadAt = DateTime.UtcNow;
-        pushNotification.UpdatedAt = DateTime.UtcNow;
+        try
+        {
+            notification.MarkAsRead();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
 
-        var updated = await repository.UpdateAsync(pushNotification, cancellationToken);
-
+        var updated = await repository.UpdateAsync(notification, cancellationToken);
         return Ok(MapToResponse(updated));
     }
 
-    /// <summary>
-    /// Maps a notification entity to a polymorphic response DTO.
-    /// </summary>
     private static NotificationResponse MapToResponse(Notification notification)
     {
-        var response = new NotificationResponse
+        return new NotificationResponse
         {
             Id = notification.Id,
             Channel = notification.Channel,
             Status = notification.Status,
             RecipientId = notification.RecipientId,
-            CreatedAt = notification.CreatedAt,
-            UpdatedAt = notification.UpdatedAt,
-            SentAt = notification.SentAt,
+            CreatedAt = notification.CreatedAtUtc,
+            UpdatedAt = notification.UpdatedAtUtc,
+            SentAt = notification.SentAtUtc,
             ErrorMessage = notification.ErrorMessage,
-            RetryCount = notification.RetryCount
-        };
-
-        // Populate channel-specific properties based on notification type
-        return notification switch
-        {
-            EmailNotification email => response with
-            {
-                Subject = email.Subject,
-                HtmlBody = email.HtmlBody
-            },
-            SmsNotification sms => response with
-            {
-                Content = sms.Content
-            },
-            WhatsAppNotification whatsApp => response with
-            {
-                TemplateName = whatsApp.TemplateName,
-                Parameters = whatsApp.Parameters
-            },
-            PushNotification push => response with
-            {
-                Title = push.Title,
-                Content = push.Content,
-                ReadAt = push.ReadAt
-            },
-            _ => response
+            RetryCount = notification.RetryCount,
+            Subject = notification.Subject,
+            HtmlBody = notification.HtmlBody,
+            Content = notification.SmsContent ?? notification.PushContent,
+            TemplateName = notification.TemplateName,
+            Parameters = notification.TemplateParameters == null
+                ? null
+                : new Dictionary<string, string>(notification.TemplateParameters),
+            Title = notification.PushTitle,
+            ReadAt = notification.ReadAtUtc
         };
     }
 
-    /// <summary>
-    /// Creates an audit log entry for a notification event.
-    /// </summary>
     private async Task CreateLogEntryAsync(
         Guid notificationId,
         NotificationChannel channel,
