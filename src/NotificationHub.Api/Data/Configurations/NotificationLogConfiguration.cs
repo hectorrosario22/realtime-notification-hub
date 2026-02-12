@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NotificationHub.Api.Entities;
+using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Data.Configurations;
 

@@ -1,11 +1,5 @@
-using NotificationHub.Api.Enums;
-using NotificationHub.Domain.Notifications;
+namespace NotificationHub.Domain.Notifications;
 
-namespace NotificationHub.Api.Entities;
-
-/// <summary>
-/// Represents an audit log entry for notification lifecycle events.
-/// </summary>
 public class NotificationLog
 {
     public Guid Id { get; set; }

@@ -1,11 +1,7 @@
-using NotificationHub.Api.Entities;
 using NotificationHub.Domain.Notifications;
 
-namespace NotificationHub.Api.Interfaces;
+namespace NotificationHub.Application.Interfaces;
 
-/// <summary>
-/// Repository interface for notification audit logs.
-/// </summary>
 public interface INotificationLogRepository
 {
     Task<NotificationLog> AddAsync(NotificationLog log, CancellationToken cancellationToken = default);

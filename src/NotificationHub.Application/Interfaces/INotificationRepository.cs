@@ -1,10 +1,7 @@
 using NotificationHub.Domain.Notifications;
 
-namespace NotificationHub.Api.Interfaces;
+namespace NotificationHub.Application.Interfaces;
 
-/// <summary>
-/// Repository contract for notification data access operations.
-/// </summary>
 public interface INotificationRepository
 {
     Task<Notification?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

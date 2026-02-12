@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using NotificationHub.Application.Interfaces;
 using NotificationHub.Api.Data;
-using NotificationHub.Api.Interfaces;
 using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Repositories;

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using NotificationHub.Api.Entities;
 using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Data;
