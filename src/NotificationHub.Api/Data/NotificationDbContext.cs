@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using NotificationHub.Api.Entities;
+using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Data;
 
@@ -14,32 +14,12 @@ public class NotificationDbContext : DbContext
     }
 
     /// <summary>
-    /// Base notifications table (includes all derived types via TPH)
+    /// Notifications table.
     /// </summary>
     public DbSet<Notification> Notifications => Set<Notification>();
 
     /// <summary>
-    /// Email notifications (filtered view of Notifications table)
-    /// </summary>
-    public DbSet<EmailNotification> EmailNotifications => Set<EmailNotification>();
-
-    /// <summary>
-    /// SMS notifications (filtered view of Notifications table)
-    /// </summary>
-    public DbSet<SmsNotification> SmsNotifications => Set<SmsNotification>();
-
-    /// <summary>
-    /// WhatsApp notifications (filtered view of Notifications table)
-    /// </summary>
-    public DbSet<WhatsAppNotification> WhatsAppNotifications => Set<WhatsAppNotification>();
-
-    /// <summary>
-    /// Push notifications (filtered view of Notifications table)
-    /// </summary>
-    public DbSet<PushNotification> PushNotifications => Set<PushNotification>();
-
-    /// <summary>
-    /// Notification audit logs
+    /// Notification audit logs.
     /// </summary>
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
 
@@ -47,7 +27,6 @@ public class NotificationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Apply all entity configurations from this assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NotificationDbContext).Assembly);
     }
 }

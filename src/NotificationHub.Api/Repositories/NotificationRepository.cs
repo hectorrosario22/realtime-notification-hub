@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using NotificationHub.Application.Interfaces;
 using NotificationHub.Api.Data;
-using NotificationHub.Api.Entities;
-using NotificationHub.Api.Enums;
-using NotificationHub.Api.Interfaces;
+using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Repositories;
 
@@ -20,7 +19,7 @@ public class NotificationRepository(NotificationDbContext context) : INotificati
     public async Task<IEnumerable<Notification>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await context.Notifications
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -28,7 +27,7 @@ public class NotificationRepository(NotificationDbContext context) : INotificati
     {
         return await context.Notifications
             .Where(n => n.Status == status)
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
 
@@ -36,43 +35,34 @@ public class NotificationRepository(NotificationDbContext context) : INotificati
     {
         return await context.Notifications
             .Where(n => n.RecipientId == recipientId)
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Notification> AddAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        notification.Id = Guid.NewGuid();
-        notification.CreatedAt = DateTime.UtcNow;
-        notification.Status = NotificationStatus.Pending;
-
         await context.Notifications.AddAsync(notification, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
-
         return notification;
     }
 
     public async Task<Notification> UpdateAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        notification.UpdatedAt = DateTime.UtcNow;
-
         context.Notifications.Update(notification);
         await context.SaveChangesAsync(cancellationToken);
-
         return notification;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var notification = await GetByIdAsync(id, cancellationToken);
-        if (notification == null)
+        if (notification is null)
         {
             return false;
         }
 
         context.Notifications.Remove(notification);
         await context.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }
