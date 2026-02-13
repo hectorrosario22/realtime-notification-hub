@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NotificationHub.Application.Common.Models;
 using NotificationHub.Application.Interfaces;
 using NotificationHub.Application.Notifications.Commands;
+using NotificationHub.Application.Notifications.Queries;
 using NotificationHub.Api.DTOs.Requests;
 using NotificationHub.Api.DTOs.Responses;
 using NotificationHub.Domain.Notifications;
@@ -97,7 +98,7 @@ public class NotificationsController(
     public async Task<ActionResult<IEnumerable<NotificationResponse>>> GetAllNotifications(
         CancellationToken cancellationToken)
     {
-        var notifications = await repository.GetAllAsync(cancellationToken);
+        var notifications = await mediator.Send(new GetAllNotificationsQuery(), cancellationToken);
         return Ok(notifications.Select(MapToResponse));
     }
 
@@ -108,7 +109,7 @@ public class NotificationsController(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var notification = await repository.GetByIdAsync(id, cancellationToken);
+        var notification = await mediator.Send(new GetNotificationByIdQuery(id), cancellationToken);
         if (notification is null)
         {
             return NotFound(new { message = $"Notification with ID {id} not found" });
