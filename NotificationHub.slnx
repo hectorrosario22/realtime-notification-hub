@@ -11,6 +11,7 @@
     <Project Path="src/Workers/NotificationHub.Workers.WhatsApp/NotificationHub.Workers.WhatsApp.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/NotificationHub.Application.Tests/NotificationHub.Application.Tests.csproj" />
     <Project Path="tests/NotificationHub.Domain.Tests/NotificationHub.Domain.Tests.csproj" />
   </Folder>
 </Solution>
