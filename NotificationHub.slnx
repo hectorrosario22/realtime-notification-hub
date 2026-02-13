@@ -10,4 +10,7 @@
     <Project Path="src/Workers/NotificationHub.Workers.Sms/NotificationHub.Workers.Sms.csproj" />
     <Project Path="src/Workers/NotificationHub.Workers.WhatsApp/NotificationHub.Workers.WhatsApp.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NotificationHub.Domain.Tests/NotificationHub.Domain.Tests.csproj" />
+  </Folder>
 </Solution>

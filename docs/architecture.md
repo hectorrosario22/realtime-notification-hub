@@ -210,6 +210,10 @@ Current endpoints:
 - `GET /api/notifications/{id}`
 - `PATCH /api/notifications/{id}/read`
 
+Lifecycle contract reference:
+
+- `docs/plans/2026-02-13-issue-3-domain-lifecycle-design.md`
+
 ---
 
 ## 4. Database Schema (InitialCreate)
