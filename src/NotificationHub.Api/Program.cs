@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NotificationHub.Application;
 using NotificationHub.Application.Interfaces;
 using NotificationHub.Api.Data;
 using NotificationHub.Api.Repositories;
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<NotificationDbContext>(options =>
 // Register repositories
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationLogRepository, NotificationLogRepository>();
+builder.Services.AddApplicationServices();
 
 // Add CORS for local development
 builder.Services.AddCors(options =>
