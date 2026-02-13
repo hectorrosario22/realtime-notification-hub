@@ -1,12 +1,10 @@
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using NotificationHub.Application.Common.Models;
-using NotificationHub.Application.Interfaces;
 using NotificationHub.Application.Notifications.Commands;
 using NotificationHub.Application.Notifications.Queries;
 using NotificationHub.Api.DTOs.Requests;
 using NotificationHub.Api.DTOs.Responses;
-using NotificationHub.Domain.Notifications;
 
 namespace NotificationHub.Api.Controllers;
 
@@ -14,7 +12,6 @@ namespace NotificationHub.Api.Controllers;
 [Route("api/[controller]")]
 public class NotificationsController(
     IMediator mediator,
-    INotificationRepository repository,
     ILogger<NotificationsController> logger)
     : ControllerBase
 {
@@ -126,53 +123,18 @@ public class NotificationsController(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var notification = await repository.GetByIdAsync(id, cancellationToken);
-        if (notification is null)
+        var result = await mediator.Send(new MarkNotificationAsReadCommand(id), cancellationToken);
+        if (result.Error == MarkNotificationAsReadError.NotFound)
         {
-            return NotFound(new { message = $"Notification with ID {id} not found" });
+            return NotFound(new { message = result.Message });
         }
 
-        if (notification.Channel != NotificationChannel.Push)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { message = "Only push notifications can be marked as read" });
+            return BadRequest(new { message = result.Message });
         }
 
-        try
-        {
-            notification.MarkAsRead();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-
-        var updated = await repository.UpdateAsync(notification, cancellationToken);
-        return Ok(MapToResponse(updated));
-    }
-
-    private static NotificationResponse MapToResponse(Notification notification)
-    {
-        return new NotificationResponse
-        {
-            Id = notification.Id,
-            Channel = notification.Channel,
-            Status = notification.Status,
-            RecipientId = notification.RecipientId,
-            CreatedAt = notification.CreatedAtUtc,
-            UpdatedAt = notification.UpdatedAtUtc,
-            SentAt = notification.SentAtUtc,
-            ErrorMessage = notification.ErrorMessage,
-            RetryCount = notification.RetryCount,
-            Subject = notification.Subject,
-            HtmlBody = notification.HtmlBody,
-            Content = notification.SmsContent ?? notification.PushContent,
-            TemplateName = notification.TemplateName,
-            Parameters = notification.TemplateParameters == null
-                ? null
-                : new Dictionary<string, string>(notification.TemplateParameters),
-            Title = notification.PushTitle,
-            ReadAt = notification.ReadAtUtc
-        };
+        return Ok(MapToResponse(result.Notification!));
     }
 
     private static NotificationResponse MapToResponse(NotificationResult notification)
