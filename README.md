@@ -2,6 +2,8 @@
 
 A scalable, multi-channel notification system demonstrating modern software architecture patterns with real-time communication capabilities.
 
+[![.NET Build and Test](https://github.com/hectorrosario22/realtime-notification-hub/actions/workflows/dotnet-build-and-test.yml/badge.svg)](https://github.com/hectorrosario22/realtime-notification-hub/actions/workflows/dotnet-build-and-test.yml)
+
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![SignalR](https://img.shields.io/badge/SignalR-Real--time-512BD4)

@@ -3,8 +3,28 @@ name: .NET Build and Test
 on:
   push:
     branches: [main]
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/global.json'
+      - 'nuget.config'
+      - '.github/workflows/dotnet-build-and-test.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/global.json'
+      - 'nuget.config'
+      - '.github/workflows/dotnet-build-and-test.yml'
 
 jobs:
   build-and-test:
