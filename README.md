@@ -172,16 +172,16 @@ Architectural decisions are tracked as ADRs in `docs/adr/` to keep design intent
 
 Roadmap tracking is managed from this README, with detailed plans in `docs/plans/`.
 
-- [ ] Fase 1 - Foundation and Architecture Baseline  
-  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-1---foundation-and-architectural-baseline-weeks-1-3`
-- [ ] Fase 2 - Reliable Messaging Core  
-  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-2---reliable-messaging-core-weeks-4-7`
-- [ ] Fase 3 - Resilience and Failure Recovery  
-  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-3---resilience-and-failure-recovery-weeks-8-10`
-- [ ] Fase 4 - Scale and Operability Maturity  
-  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-4---scale-and-operability-maturity-weeks-11-13`
-- [ ] Fase 5 - Portfolio Packaging and Interview Readiness  
-  Plan detallado: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#fase-5---portfolio-packaging-and-interview-readiness-weeks-14-16`
+- [ ] Phase 1 - Foundation and Architecture Baseline  
+  Detailed plan: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#phase-1---foundation-and-architectural-baseline-weeks-1-3`
+- [ ] Phase 2 - Reliable Messaging Core  
+  Detailed plan: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#phase-2---reliable-messaging-core-weeks-4-7`
+- [ ] Phase 3 - Resilience and Failure Recovery  
+  Detailed plan: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#phase-3---resilience-and-failure-recovery-weeks-8-10`
+- [ ] Phase 4 - Scale and Operability Maturity  
+  Detailed plan: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#phase-4---scale-and-operability-maturity-weeks-11-13`
+- [ ] Phase 5 - Portfolio Packaging and Interview Readiness  
+  Detailed plan: `docs/plans/2026-02-12-backend-senior-roadmap-design.md#phase-5---portfolio-packaging-and-interview-readiness-weeks-14-16`
 
 ## 🔧 Technology Stack
 

@@ -20,15 +20,15 @@ The project should prove:
 Total horizon: 12 to 16 weeks.  
 Execution model: 5 phases, each ending with a demo artifact and objective acceptance criteria.
 
-- Fase 1: Foundation and Architectural Baseline (Weeks 1-3)
-- Fase 2: Reliable Messaging Core (Weeks 4-7)
-- Fase 3: Resilience and Failure Recovery (Weeks 8-10)
-- Fase 4: Scale and Operability Maturity (Weeks 11-13)
-- Fase 5: Portfolio Packaging and Interview Readiness (Weeks 14-16)
+- Phase 1: Foundation and Architectural Baseline (Weeks 1-3)
+- Phase 2: Reliable Messaging Core (Weeks 4-7)
+- Phase 3: Resilience and Failure Recovery (Weeks 8-10)
+- Phase 4: Scale and Operability Maturity (Weeks 11-13)
+- Phase 5: Portfolio Packaging and Interview Readiness (Weeks 14-16)
 
 ## 3. Plan by Phase
 
-### Fase 1 - Foundation and Architectural Baseline (Weeks 1-3)
+### Phase 1 - Foundation and Architectural Baseline (Weeks 1-3)
 
 Objective: Make current and target architecture explicit, then create a solid base for distributed workflows.
 
@@ -65,7 +65,7 @@ Definition of done:
 - Layering violations are absent (Domain has no infra refs).
 - At least 10 meaningful tests added (domain + application unit tests).
 
-### Fase 2 - Reliable Messaging Core (Weeks 4-7)
+### Phase 2 - Reliable Messaging Core (Weeks 4-7)
 
 Objective: Implement trustworthy asynchronous dispatch from API to workers.
 
@@ -98,7 +98,7 @@ Definition of done:
 - Duplicate event delivery is safely handled.
 - At least 2 integration tests proving outbox dispatch and idempotent consumption.
 
-### Fase 3 - Resilience and Failure Recovery (Weeks 8-10)
+### Phase 3 - Resilience and Failure Recovery (Weeks 8-10)
 
 Objective: Show production-grade behavior under failure.
 
@@ -128,7 +128,7 @@ Definition of done:
 - Replay from DLQ reaches consistent final status.
 - Integration tests for transient failure, permanent failure, and replay path.
 
-### Fase 4 - Scale and Operability Maturity (Weeks 11-13)
+### Phase 4 - Scale and Operability Maturity (Weeks 11-13)
 
 Objective: Demonstrate that the design can operate and scale predictably.
 
@@ -160,7 +160,7 @@ Definition of done:
 - Operational signals are visible without reading raw DB tables.
 - Latency and error metrics are queryable and explained in docs.
 
-### Fase 5 - Portfolio Packaging and Interview Readiness (Weeks 14-16)
+### Phase 5 - Portfolio Packaging and Interview Readiness (Weeks 14-16)
 
 Objective: Convert implementation into interview leverage.
 
@@ -219,7 +219,7 @@ Definition of done:
 
 ## 5. Metrics That Strengthen Senior Signal
 
-Track these from Fase 2 onward:
+Track these from Phase 2 onward:
 
 - End-to-end processing latency (P50/P95/P99).
 - Event publish success rate from outbox.
@@ -262,7 +262,7 @@ Target examples (adjust after baseline):
 
 ## 9. Immediate Next Sprint (Start Here)
 
-Sprint Goal (2 weeks): Finish Fase 1 foundation.
+Sprint Goal (2 weeks): Finish Phase 1 foundation.
 
 Backlog:
 
