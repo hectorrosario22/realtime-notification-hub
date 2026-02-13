@@ -5,6 +5,17 @@ namespace NotificationHub.Domain.Notifications;
 
 public sealed class Notification : AggregateRoot<Guid>
 {
+    private static readonly IReadOnlyDictionary<NotificationStatus, HashSet<NotificationStatus>> AllowedTransitions =
+        new Dictionary<NotificationStatus, HashSet<NotificationStatus>>
+        {
+            [NotificationStatus.Pending] = [NotificationStatus.Queued],
+            [NotificationStatus.Queued] = [NotificationStatus.Processing, NotificationStatus.Sent, NotificationStatus.Failed],
+            [NotificationStatus.Processing] = [NotificationStatus.Sent, NotificationStatus.Failed],
+            [NotificationStatus.Sent] = [NotificationStatus.Read],
+            [NotificationStatus.Failed] = [NotificationStatus.Queued],
+            [NotificationStatus.Read] = []
+        };
+
     public NotificationChannel Channel { get; private set; }
     public NotificationStatus Status { get; private set; }
     public NotificationPriority Priority { get; private set; }
@@ -97,20 +108,26 @@ public sealed class Notification : AggregateRoot<Guid>
 
     public void MarkAsQueued()
     {
-        EnsureAllowedTransition(NotificationStatus.Pending, NotificationStatus.Failed);
+        EnsureTransitionTo(NotificationStatus.Queued);
+
+        if (Status == NotificationStatus.Failed && !CanRetry())
+        {
+            throw new InvalidOperationException("Cannot queue notification: maximum retries reached.");
+        }
+
         ChangeStatus(NotificationStatus.Queued);
         ErrorMessage = null;
     }
 
     public void StartProcessing()
     {
-        EnsureAllowedTransition(NotificationStatus.Queued);
+        EnsureTransitionTo(NotificationStatus.Processing);
         ChangeStatus(NotificationStatus.Processing);
     }
 
     public void MarkAsSent(DateTime? sentAtUtc = null)
     {
-        EnsureAllowedTransition(NotificationStatus.Queued, NotificationStatus.Processing);
+        EnsureTransitionTo(NotificationStatus.Sent);
         SentAtUtc = sentAtUtc ?? DateTime.UtcNow;
         ErrorMessage = null;
         ChangeStatus(NotificationStatus.Sent);
@@ -118,7 +135,7 @@ public sealed class Notification : AggregateRoot<Guid>
 
     public void MarkAsFailed(string errorMessage)
     {
-        EnsureAllowedTransition(NotificationStatus.Queued, NotificationStatus.Processing);
+        EnsureTransitionTo(NotificationStatus.Failed);
         ErrorMessage = RequireNonEmpty(errorMessage, nameof(errorMessage));
         RetryCount++;
         ChangeStatus(NotificationStatus.Failed);
@@ -126,7 +143,7 @@ public sealed class Notification : AggregateRoot<Guid>
 
     public void MarkAsRead(DateTime? readAtUtc = null)
     {
-        EnsureAllowedTransition(NotificationStatus.Sent);
+        EnsureTransitionTo(NotificationStatus.Read);
         ReadAtUtc = readAtUtc ?? DateTime.UtcNow;
         ChangeStatus(NotificationStatus.Read);
     }
@@ -166,12 +183,12 @@ public sealed class Notification : AggregateRoot<Guid>
         return notification;
     }
 
-    private void EnsureAllowedTransition(params NotificationStatus[] allowedCurrentStatuses)
+    private void EnsureTransitionTo(NotificationStatus targetStatus)
     {
-        if (!allowedCurrentStatuses.Contains(Status))
+        if (!AllowedTransitions.TryGetValue(Status, out var nextStatuses) || !nextStatuses.Contains(targetStatus))
         {
             throw new InvalidOperationException(
-                $"Invalid state transition. Current status is {Status}.");
+                $"Invalid state transition: {Status} -> {targetStatus}.");
         }
     }
 
