@@ -1,5 +1,8 @@
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using NotificationHub.Application.Common.Models;
 using NotificationHub.Application.Interfaces;
+using NotificationHub.Application.Notifications.Commands;
 using NotificationHub.Api.DTOs.Requests;
 using NotificationHub.Api.DTOs.Responses;
 using NotificationHub.Domain.Notifications;
@@ -9,8 +12,8 @@ namespace NotificationHub.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class NotificationsController(
+    IMediator mediator,
     INotificationRepository repository,
-    INotificationLogRepository logRepository,
     ILogger<NotificationsController> logger)
     : ControllerBase
 {
@@ -23,15 +26,12 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending email notification to {RecipientId}", request.RecipientId);
 
-        var notification = Notification.CreateEmail(
+        var command = new CreateEmailNotificationCommand(
             request.RecipientId,
             request.Subject,
             request.HtmlBody);
 
-        var created = await repository.AddAsync(notification, cancellationToken);
-
-        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
-            "Email notification created", cancellationToken);
+        var created = await mediator.Send(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
@@ -45,14 +45,11 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending SMS notification to {RecipientId}", request.RecipientId);
 
-        var notification = Notification.CreateSms(
+        var command = new CreateSmsNotificationCommand(
             request.RecipientId,
             request.Content);
 
-        var created = await repository.AddAsync(notification, cancellationToken);
-
-        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
-            "SMS notification created", cancellationToken);
+        var created = await mediator.Send(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
@@ -66,15 +63,12 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending WhatsApp notification to {RecipientId}", request.RecipientId);
 
-        var notification = Notification.CreateWhatsApp(
+        var command = new CreateWhatsAppNotificationCommand(
             request.RecipientId,
             request.TemplateName,
             request.Parameters);
 
-        var created = await repository.AddAsync(notification, cancellationToken);
-
-        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
-            "WhatsApp notification created", cancellationToken);
+        var created = await mediator.Send(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
@@ -88,15 +82,12 @@ public class NotificationsController(
     {
         logger.LogInformation("Sending push notification to {RecipientId}", request.RecipientId);
 
-        var notification = Notification.CreatePush(
+        var command = new CreatePushNotificationCommand(
             request.RecipientId,
             request.Title,
             request.Content);
 
-        var created = await repository.AddAsync(notification, cancellationToken);
-
-        await CreateLogEntryAsync(created.Id, created.Channel, NotificationEventType.Created,
-            "Push notification created", cancellationToken);
+        var created = await mediator.Send(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetNotificationById), new { id = created.Id }, MapToResponse(created));
     }
@@ -183,23 +174,28 @@ public class NotificationsController(
         };
     }
 
-    private async Task CreateLogEntryAsync(
-        Guid notificationId,
-        NotificationChannel channel,
-        NotificationEventType eventType,
-        string? message,
-        CancellationToken cancellationToken)
+    private static NotificationResponse MapToResponse(NotificationResult notification)
     {
-        var logEntry = new NotificationLog
+        return new NotificationResponse
         {
-            Id = Guid.NewGuid(),
-            NotificationId = notificationId,
-            Channel = channel,
-            EventType = eventType,
-            Message = message,
-            Timestamp = DateTime.UtcNow
+            Id = notification.Id,
+            Channel = notification.Channel,
+            Status = notification.Status,
+            RecipientId = notification.RecipientId,
+            CreatedAt = notification.CreatedAt,
+            UpdatedAt = notification.UpdatedAt,
+            SentAt = notification.SentAt,
+            ErrorMessage = notification.ErrorMessage,
+            RetryCount = notification.RetryCount,
+            Subject = notification.Subject,
+            HtmlBody = notification.HtmlBody,
+            Content = notification.Content,
+            TemplateName = notification.TemplateName,
+            Parameters = notification.Parameters == null
+                ? null
+                : new Dictionary<string, string>(notification.Parameters),
+            Title = notification.Title,
+            ReadAt = notification.ReadAt
         };
-
-        await logRepository.AddAsync(logEntry, cancellationToken);
     }
 }
