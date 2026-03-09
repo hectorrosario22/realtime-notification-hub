@@ -19,17 +19,27 @@ services:
   rabbitmq:
     image: rabbitmq:4-management-alpine
     container_name: notification-hub-rabbitmq
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+        reservations:
+          memory: 1GB
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:15672/api/health/checks/ready-to-serve-clients || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 20s
 
   api:
     build:
@@ -87,3 +97,5 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:
+  rabbitmq_log:
