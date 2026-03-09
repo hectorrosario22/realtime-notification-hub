@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NotificationHub.Api/NotificationHub.Api.csproj" />
+    <Project Path="src/NotificationHub.Application/NotificationHub.Application.csproj" />
+    <Project Path="src/NotificationHub.Domain/NotificationHub.Domain.csproj" />
+    <Project Path="src/NotificationHub.Infrastructure/NotificationHub.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Workers/">
+    <Project Path="src/Workers/NotificationHub.Worker.Email/NotificationHub.Worker.Email.csproj" />
+    <Project Path="src/Workers/NotificationHub.Worker.Sms/NotificationHub.Worker.Sms.csproj" />
+    <Project Path="src/Workers/NotificationHub.Worker.WhatsApp/NotificationHub.Worker.WhatsApp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NotificationHub.Api.Tests/NotificationHub.Api.Tests.csproj" />
+    <Project Path="tests/NotificationHub.Application.Tests/NotificationHub.Application.Tests.csproj" />
+    <Project Path="tests/NotificationHub.Domain.Tests/NotificationHub.Domain.Tests.csproj" />
+    <Project Path="tests/NotificationHub.Infrastructure.Tests/NotificationHub.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

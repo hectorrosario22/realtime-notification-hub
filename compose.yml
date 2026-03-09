@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: notification-hub-postgres
+    environment:
+      POSTGRES_DB: notification_hub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notification_hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: notification-hub-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/NotificationHub.Api/Dockerfile
+    container_name: notification-hub-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker-email:
+    build:
+      context: .
+      dockerfile: src/Workers/NotificationHub.Worker.Email/Dockerfile
+    container_name: notification-hub-worker-email
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker-sms:
+    build:
+      context: .
+      dockerfile: src/Workers/NotificationHub.Worker.Sms/Dockerfile
+    container_name: notification-hub-worker-sms
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker-whatsapp:
+    build:
+      context: .
+      dockerfile: src/Workers/NotificationHub.Worker.WhatsApp/Dockerfile
+    container_name: notification-hub-worker-whatsapp
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -1,0 +1,77 @@
+## .NET
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.swp
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+[Pp]ublish/
+
+## Visual Studio
+.vs/
+*.rsuser
+*.pidb
+*.svclog
+*.scc
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Environment / Secrets
+*.env
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+secrets.json
+**/user-secrets/
+
+## Test results
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+## Node (thin client)
+node_modules/
+dist/
+.pnpm-store/
+
+## Docker
+.dockerignore

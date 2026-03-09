@@ -1,194 +1,208 @@
-# 🔔 Realtime Notification Hub
+# Realtime Notification Hub
 
-Realtime Notification Hub is a scalable, event-driven notification platform built with .NET 10 microservices, RabbitMQ messaging, and SignalR. Supports real-time push notifications plus async multi-channel delivery via workers (Email, SMS, WhatsApp) with a PostgreSQL backend.
+An event-driven notification platform built with .NET 10, Clean Architecture, RabbitMQ, and SignalR. Supports real-time push notifications and async multi-channel delivery (Email, SMS, WhatsApp) through dedicated worker services.
 
 [![.NET Build and Test](https://github.com/hectorrosario22/realtime-notification-hub/actions/workflows/dotnet-build-and-test.yml/badge.svg)](https://github.com/hectorrosario22/realtime-notification-hub/actions/workflows/dotnet-build-and-test.yml)
-
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![SignalR](https://img.shields.io/badge/SignalR-Real--time-512BD4)
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Messaging-FF6600?logo=rabbitmq)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-4.x-FF6600?logo=rabbitmq)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
-![Architecture](https://img.shields.io/badge/Focus-Backend%20Architecture-0A7B83)
+![Architecture](https://img.shields.io/badge/Clean%20Architecture-.NET%2010-0A7B83)
 
-## 📋 Overview
+---
 
-This project showcases a backend-first, production-oriented notification platform that supports multiple delivery channels:
-- 📧 **Email** - Asynchronous email delivery via dedicated worker
-- 📱 **SMS** - Asynchronous SMS delivery via dedicated worker
-- 💬 **WhatsApp** - Asynchronous WhatsApp delivery via dedicated worker
-- 🔔 **Push** - Real-time notifications via SignalR
+## About
 
-Built to demonstrate senior-level architectural patterns including event-driven messaging, worker-based processing, real-time communication, and microservices-oriented backend design.
+This project is inspired by a notification module I built for an insurance company in Mexico. I recreated it as the centerpiece of my portfolio to demonstrate senior-level backend patterns: async messaging, concurrent worker processing, real-time communication, and maintainability-focused design.
 
-> The React client is intentionally minimal and acts only as a bridge to showcase API and realtime capabilities.
+The focus is entirely on the backend. The web client is intentionally minimal — it exists so that anyone (including recruiters) can interact with the system without needing Swagger, Postman, or any other tool.
 
-## ✨ Key Features
+### Supported channels
 
-- **Realtime Push**: SignalR hub broadcasting notification events to connected clients.
-- **Async Multi-Channel Delivery**: RabbitMQ-backed worker processing for Email, SMS, and WhatsApp.
-- **Scalable Backend Design**: .NET 10 microservices-style architecture with decoupled processing flows.
-- **Persistent State**: PostgreSQL as system-of-record for notification lifecycle and delivery status.
-- **API-First Platform**: REST endpoints with OpenAPI/Swagger documentation.
-- **Containerized Runtime**: `compose.yml` orchestration for API, workers, PostgreSQL, and RabbitMQ.
+| Channel | Mechanism | Flow |
+|---------|-----------|------|
+| **Push** | SignalR | API → WebSocket → browser (real-time) |
+| **Email** | RabbitMQ + Worker | API → queue → worker → retries → DB |
+| **SMS** | RabbitMQ + Worker | API → queue → worker → retries → DB |
+| **WhatsApp** | RabbitMQ + Worker | API → queue → worker → retries → DB |
 
-## 🏗️ Architecture
-```text
-┌─────────────────┐
-│  Thin Client    │
-│ (React / UI)    │
-└────────┬────────┘
-         │ HTTP & WebSocket
-         ▼
-┌─────────────────┐
-│ Notifications   │
-│      API        │
-│  (.NET 10 API)  │
-└────────┬────────┘
-         │ Publish Events
-         ▼
-┌─────────────────┐      ┌──────────────────┐
-│   RabbitMQ      │─────▶│  Worker Services │
-│ Message Broker  │      │  • Email Worker  │
-│                 │      │  • SMS Worker    │
-│  • Email Queue  │      │  • WhatsApp Work.│
-│  • SMS Queue    │      └──────────────────┘
-│  • WhatsApp Q   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   PostgreSQL    │
-│   Database      │
-└─────────────────┘
+Async channels support up to **3 retry attempts**. Failures are persisted in the database and queryable through the API.
+
+---
+
+## Architecture
+
+### Delivery flows
+
+```
+┌─────────────────────────────────────────────────────┐
+│  PUSH (real-time)                                   │
+│                                                     │
+│  Client ──HTTP──▶ API ──SignalR──▶ Browser          │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  EMAIL / SMS / WHATSAPP (async)                     │
+│                                                     │
+│  Client ──HTTP──▶ API ──publish──▶ RabbitMQ         │
+│                    │                    │           │
+│                    ◀── 202 Accepted     │           │
+│                                         ▼           │
+│                               Worker (consume)      │
+│                               │  ├─ attempt 1      │
+│                               │  ├─ attempt 2      │
+│                               │  └─ attempt 3      │
+│                               │                    │
+│                               ▼                    │
+│                           PostgreSQL               │
+│                     (status + failures)            │
+└─────────────────────────────────────────────────────┘
 ```
 
-Current and target architecture details are documented in:
+### Solution structure (Clean Architecture)
 
-- `docs/architecture.md`
-- `docs/adr/README.md`
+```
+src/
+├── NotificationHub.Domain/          # Entities, enums, value objects — no external dependencies
+├── NotificationHub.Application/     # Interfaces, MassTransit contracts, DTOs, services
+├── NotificationHub.Infrastructure/  # EF Core, MassTransit/RabbitMQ, service implementations
+├── NotificationHub.Api/             # ASP.NET Core Minimal API + SignalR hub
+└── Workers/
+    ├── NotificationHub.Worker.Email/
+    ├── NotificationHub.Worker.Sms/
+    └── NotificationHub.Worker.WhatsApp/
 
-## 🚀 Getting Started
+tests/
+├── NotificationHub.Domain.Tests/
+├── NotificationHub.Application.Tests/
+├── NotificationHub.Infrastructure.Tests/
+└── NotificationHub.Api.Tests/       # Integration tests with WebApplicationFactory
+```
 
-### Prerequisites
+### Layer dependencies
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Node.js 18+](https://nodejs.org/) with pnpm (`npm install -g pnpm`) for the thin client
-- [Podman Desktop](https://podman.io/) or [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+```
+Domain ◀── Application ◀── Infrastructure ◀── Api
+                                    ▲
+                                 Workers
+```
 
-### Quick Start (Recommended)
+---
 
-This project is designed to run with Podman Compose. Compose orchestration includes API, workers, database, and message broker.
+## API Endpoints
 
-1. **Clone the repository**
+```
+POST /api/notifications/push        Send a real-time push notification via SignalR
+POST /api/notifications/email       Enqueue an email notification
+POST /api/notifications/sms         Enqueue an SMS notification
+POST /api/notifications/whatsapp    Enqueue a WhatsApp notification
+
+GET  /api/notifications/{id}        Get the status of a notification by ID
+GET  /api/notifications/failed      List notifications that exhausted all retry attempts
+```
+
+WebSocket: `ws://localhost:5000/hubs/notifications`
+
+Interactive docs: [http://localhost:5000/scalar](http://localhost:5000/scalar)
+
+---
+
+## Services (compose.yml)
+
+| Service | Image / Build | Port |
+|---------|---------------|------|
+| `api` | Build from `src/NotificationHub.Api/` | `5000` |
+| `worker-email` | Build from `src/Workers/.../Email/` | — |
+| `worker-sms` | Build from `src/Workers/.../Sms/` | — |
+| `worker-whatsapp` | Build from `src/Workers/.../WhatsApp/` | — |
+| `postgres` | `postgres:16-alpine` | `5432` |
+| `rabbitmq` | `rabbitmq:4-management-alpine` | `5672` / `15672` |
+
+---
+
+## Quick Start
+
+**Requirements:** [Podman](https://podman.io/) or [Docker](https://www.docker.com/products/docker-desktop/) with Compose.
+
 ```bash
 git clone https://github.com/hectorrosario22/realtime-notification-hub.git
 cd realtime-notification-hub
-```
 
-2. **Start all services**
-```bash
+# Start all services
 podman compose up -d
-```
 
-Or with Docker:
-```bash
-docker compose up -d
-```
+# Follow logs
+podman compose logs -f
 
-3. **Access running services**
-- API: http://localhost:5000
-- Swagger UI: http://localhost:5000/swagger
-- RabbitMQ Management: http://localhost:15672 (guest/guest)
-
-4. **Stop all services**
-```bash
+# Stop
 podman compose down
 ```
 
-### Alternative: Local Development
+Once running:
+- **API + interactive docs:** http://localhost:5000/scalar
+- **RabbitMQ Management:** http://localhost:15672 (`guest` / `guest`)
 
-If you need to run services individually for development:
+### Local development (without containerizing the app)
 
-#### Infrastructure only (PostgreSQL + RabbitMQ)
 ```bash
+# Start infrastructure only
 podman compose up postgres rabbitmq -d
-```
 
-#### Backend (.NET API)
-```bash
+# Run the API
 cd src/NotificationHub.Api
-dotnet restore
+dotnet run
+
+# Run workers (each in a separate terminal)
+cd src/Workers/NotificationHub.Worker.Email
 dotnet run
 ```
 
-> **Note**: For the best end-to-end demonstration, use `podman compose up` to run everything together.
+---
 
-## 🔧 Technology Stack
+## Tech Stack
 
-### Backend
-- **.NET 10** - Web API framework
-- **SignalR** - Real-time WebSocket communication
-- **Entity Framework Core** - ORM for PostgreSQL
-- **RabbitMQ** - Message broker
-- **MassTransit** - Distributed application framework
-- **Polly** - Resilience and retry policies
-- **Serilog** - Structured logging
+**Backend**
+- .NET 10 — ASP.NET Core Minimal APIs
+- SignalR — WebSocket-based real-time push
+- MassTransit 9 — RabbitMQ abstraction (publish, consume, retry, DLQ)
+- Entity Framework Core 10 — ORM with PostgreSQL
+- Polly — resilience and retry policies
+- Serilog — structured logging
 
-### Supporting Client
-- **React 18** - Thin UI bridge for API and realtime visualization
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Build tool
+**Infrastructure**
+- PostgreSQL 16 — persistent notification state
+- RabbitMQ 4 — message broker, one queue per channel
+- Podman / Docker — container runtime
 
-### Infrastructure
-- **PostgreSQL 16** - Relational database
-- **RabbitMQ** - Message queue
-- **Podman / Docker** - Container runtime
+**Testing**
+- xUnit — unit tests per layer
+- `Microsoft.AspNetCore.Mvc.Testing` — API integration tests
 
-## 🧪 Testing
+---
 
-```bash
-# Build the solution
-dotnet build
-```
+## Production Considerations
 
-## 🚀 Production Considerations
+This is a portfolio/demonstration project. For a production deployment, the following would be added:
 
-This is a demonstration project. For production deployment, consider:
+- Authentication and authorization (JWT / OAuth2)
+- Per-channel and per-client rate limiting
+- Recipient-specific notification routing
+- Observability: OpenTelemetry, distributed tracing, metrics
+- Secret management (Azure Key Vault, AWS Secrets Manager)
+- API versioning
+- TLS across all services
+- Horizontal scaling strategies for workers
 
-- ✅ Authentication & Authorization (JWT, OAuth2)
-- ✅ Rate limiting and throttling
-- ✅ User-specific notification routing
-- ✅ Persistent message storage hardening
-- ✅ Monitoring & alerting (Application Insights, Prometheus, OpenTelemetry)
-- ✅ API versioning
-- ✅ HTTPS/TLS everywhere
-- ✅ Secret management (Azure Key Vault, AWS Secrets Manager)
-- ✅ Horizontal scaling strategies
-- ✅ Database migration discipline
+---
 
-## 📚 Learning Resources
+## Author
 
-This project demonstrates concepts from:
-- [.NET Microservices Architecture](https://dotnet.microsoft.com/learn/aspnet/microservices-architecture)
-- [SignalR Documentation](https://learn.microsoft.com/aspnet/core/signalr)
-- [RabbitMQ Tutorials](https://www.rabbitmq.com/getstarted.html)
-- [MassTransit Documentation](https://masstransit.io/)
+**Héctor Rosario** — Backend Engineer (.NET)
 
-## 🤝 Contributing
-
-This is a portfolio/demonstration project, but feedback and suggestions are welcome.
-
-## 📄 License
-
-MIT License - feel free to use this project for learning purposes and architecture reference.
-
-## 👤 Author
-
-**Héctor Rosario**
 - LinkedIn: [hector-rosario](https://www.linkedin.com/in/hector-rosario)
 - GitHub: [@hectorrosario22](https://github.com/hectorrosario22)
 - Email: [me@hrosario.dev](mailto:me@hrosario.dev)
 
 ---
 
-⭐ If you find this project helpful, please give it a star!
+MIT License
