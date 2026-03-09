@@ -6,11 +6,6 @@
       "sourceType": "github",
       "computedHash": "5cafa1558b0b6bd4d4c71f23d5567b7fcbbcdb4b0a50b0c5f69a80a3cebaf9b8"
     },
-    "conventional-commit": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "computedHash": "f29c9486cede6c7b2df0cfb0a2e4aa67446552b991bcf17d1b309e903171f03d"
-    },
     "dotnet-api": {
       "source": "novotnyllc/dotnet-artisan",
       "sourceType": "github",
