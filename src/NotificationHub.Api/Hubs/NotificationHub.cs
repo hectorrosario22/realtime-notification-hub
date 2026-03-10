@@ -8,19 +8,30 @@ namespace NotificationHub.Api.Hubs;
 /// </summary>
 public class PushNotificationHub : Hub
 {
-    // TODO: On connection, add client to group "recipient-{recipientId}"
-    // TODO: On disconnection, remove client from group
+    private const string RecipientIdKey = "RecipientId";
 
     public override async Task OnConnectedAsync()
     {
-        // TODO: Extract recipientId from query string or claims and add to group
-        // await Groups.AddToGroupAsync(Context.ConnectionId, $"recipient-{recipientId}");
+        var recipientIdRaw = Context.GetHttpContext()?.Request.Query["recipientId"].ToString();
+
+        if (Guid.TryParse(recipientIdRaw, out var recipientId))
+        {
+            var groupName = $"recipient-{recipientId}";
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            Context.Items[RecipientIdKey] = recipientId;
+        }
+
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        // TODO: Remove from group on disconnect
+        if (Context.Items.TryGetValue(RecipientIdKey, out var recipientIdObj) && recipientIdObj is Guid recipientId)
+        {
+            var groupName = $"recipient-{recipientId}";
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+        }
+
         await base.OnDisconnectedAsync(exception);
     }
 }

@@ -1,3 +1,6 @@
+using NotificationHub.Application.DTOs;
+using NotificationHub.Application.Interfaces;
+
 namespace NotificationHub.Api.Endpoints;
 
 public static class NotificationEndpoints
@@ -39,10 +42,13 @@ public static class NotificationEndpoints
 
     // --- Handlers ---
 
-    private static IResult SendPushNotification()
+    private static async Task<IResult> SendPushNotification(
+        SendPushNotificationRequest request,
+        INotificationService service,
+        CancellationToken ct)
     {
-        // TODO: Inject INotificationService, send via SignalR, persist to DB
-        return Results.Ok();
+        var response = await service.SendPushAsync(request, ct);
+        return Results.Created($"/api/notifications/{response.Id}", response);
     }
 
     private static IResult SendEmailNotification()
@@ -63,15 +69,20 @@ public static class NotificationEndpoints
         return Results.Accepted();
     }
 
-    private static IResult GetNotificationById(Guid id)
+    private static async Task<IResult> GetNotificationById(
+        Guid id,
+        INotificationService service,
+        CancellationToken ct)
     {
-        // TODO: Inject INotificationService, query notification by ID from DB
-        return Results.Ok();
+        var response = await service.GetByIdAsync(id, ct);
+        return response is not null ? Results.Ok(response) : Results.NotFound();
     }
 
-    private static IResult GetFailedNotifications()
+    private static async Task<IResult> GetFailedNotifications(
+        INotificationService service,
+        CancellationToken ct)
     {
-        // TODO: Inject INotificationService, query failed notifications from DB
-        return Results.Ok();
+        var response = await service.GetFailedAsync(ct);
+        return Results.Ok(response);
     }
 }
