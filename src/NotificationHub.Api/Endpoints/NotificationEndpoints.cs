@@ -51,10 +51,13 @@ public static class NotificationEndpoints
         return Results.Created($"/api/notifications/{response.Id}", response);
     }
 
-    private static IResult SendEmailNotification()
+    private static async Task<IResult> SendEmailNotification(
+        SendEmailNotificationRequest request,
+        INotificationService service,
+        CancellationToken ct)
     {
-        // TODO: Inject INotificationService, publish to email queue via MassTransit
-        return Results.Accepted();
+        var response = await service.SendEmailAsync(request, ct);
+        return Results.Accepted($"/api/notifications/{response.Id}", response);
     }
 
     private static IResult SendSmsNotification()

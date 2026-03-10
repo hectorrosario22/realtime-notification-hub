@@ -11,6 +11,7 @@ namespace NotificationHub.Application.Services;
 internal sealed class NotificationService(
     INotificationRepository repository,
     IPushNotificationSender pushSender,
+    IMessagePublisher messagePublisher,
     ILogger<NotificationService> logger) : INotificationService
 {
     public async Task<NotificationResponse> SendPushAsync(
@@ -62,6 +63,81 @@ internal sealed class NotificationService(
 
             logger.LogError(ex,
                 "Failed to send push notification {NotificationId} to recipient {RecipientId}",
+                notification.Id, notification.RecipientId);
+        }
+
+        return MapToResponse(notification);
+    }
+
+    public async Task<NotificationResponse> SendEmailAsync(
+        SendEmailNotificationRequest request, CancellationToken ct = default)
+    {
+        if (!Enum.TryParse<NotificationPriority>(request.Priority, ignoreCase: true, out var priority))
+            priority = NotificationPriority.Normal;
+
+        var metadata = request.Metadata is not null
+            ? NotificationMetadata.Create(request.Metadata)
+            : null;
+
+        var to = EmailAddress.Create(request.To);
+        var from = request.From is not null ? EmailAddress.Create(request.From) : null;
+        var replyTo = request.ReplyTo is not null ? EmailAddress.Create(request.ReplyTo) : null;
+        var cc = request.Cc?.Select(EmailAddress.Create).ToList();
+        var bcc = request.Bcc?.Select(EmailAddress.Create).ToList();
+
+        var notification = new EmailNotification(
+            request.RecipientId,
+            request.Subject,
+            request.Body,
+            to,
+            priority,
+            from,
+            replyTo,
+            cc,
+            bcc,
+            request.IsHtml,
+            request.AttachmentUrls,
+            metadata);
+
+        await repository.AddAsync(notification, ct);
+
+        logger.LogInformation(
+            "Email notification {NotificationId} created for recipient {RecipientId}",
+            notification.Id, notification.RecipientId);
+
+        notification.MarkAsQueued();
+        await repository.UpdateAsync(notification, ct);
+
+        var queueMessage = new EmailNotificationMessage(
+            notification.Id,
+            notification.RecipientId,
+            notification.Title,
+            notification.Body,
+            notification.To.Value,
+            notification.From?.Value,
+            notification.ReplyTo?.Value,
+            notification.Cc.Select(a => a.Value).ToList(),
+            notification.Bcc.Select(a => a.Value).ToList(),
+            notification.IsHtml,
+            notification.AttachmentUrls,
+            notification.Priority.ToString(),
+            notification.QueuedAt!.Value);
+
+        try
+        {
+            await messagePublisher.PublishAsync(queueMessage, ct);
+
+            logger.LogInformation(
+                "Email notification {NotificationId} published to queue for recipient {RecipientId}",
+                notification.Id, notification.RecipientId);
+        }
+        catch (Exception ex)
+        {
+            notification.MarkAsFailed(ex.Message);
+            await repository.UpdateAsync(notification, ct);
+
+            logger.LogError(ex,
+                "Failed to queue email notification {NotificationId} for recipient {RecipientId}",
                 notification.Id, notification.RecipientId);
         }
 

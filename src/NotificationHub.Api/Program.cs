@@ -1,3 +1,5 @@
+using MassTransit;
+using NotificationHub.Api.Consumers;
 using NotificationHub.Api.Hubs;
 using NotificationHub.Api.Endpoints;
 using NotificationHub.Api.Services;
@@ -37,6 +39,24 @@ builder.Services.AddCors(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IPushNotificationSender, SignalRPushNotificationSender>();
+
+// MassTransit / RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<NotificationStatusUpdateConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbit = builder.Configuration.GetSection("RabbitMQ");
+        cfg.Host(rabbit["Host"], rabbit["VirtualHost"], h =>
+        {
+            h.Username(rabbit["Username"]!);
+            h.Password(rabbit["Password"]!);
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 
